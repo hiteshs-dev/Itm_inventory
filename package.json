@@ -1,0 +1,8 @@
+{
+  "name": "itm-inventory",
+  "version": "2.0.0",
+  "description": "ITM Inventory System - Techy Version",
+  "dependencies": {
+    "@neondatabase/serverless": "^0.9.4"
+  }
+}
