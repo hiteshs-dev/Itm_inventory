@@ -1,48 +1,37 @@
 // ================= CONFIG =================
 const API_URL = "/.netlify/functions/data";
-
-// ================= LOGIN CONFIG =================
 const LOGIN_USER = "admin";
 const LOGIN_PASS = "unix@2026";
 
-// ================= HELPERS =================
-function showAlert(msg) {
-  alert(msg);
-}
-
-// ================= LOGIN LOGIC =================
+// ================= LOGIN =================
 function checkLogin() {
-  const loggedIn = localStorage.getItem("loggedIn");
-
-  if (loggedIn === "true") {
-    document.getElementById("loginModal").style.display = "none";
-    document.getElementById("navTabs").style.display = "flex";
-  } else {
-    document.getElementById("loginModal").style.display = "flex";
-    document.getElementById("navTabs").style.display = "none";
-  }
+  const ok = localStorage.getItem("loggedIn") === "true";
+  loginModal.style.display = ok ? "none" : "flex";
+  navTabs.style.display = ok ? "flex" : "none";
 }
+
+loginForm.addEventListener("submit", e => {
+  e.preventDefault();
+  if (username.value === LOGIN_USER && password.value === LOGIN_PASS) {
+    localStorage.setItem("loggedIn", "true");
+    loginError.style.display = "none";
+    checkLogin();
+    loadInventory();
+  } else {
+    loginError.style.display = "block";
+  }
+});
 
 function logout() {
   localStorage.removeItem("loggedIn");
   location.reload();
 }
 
-document.getElementById("loginForm")?.addEventListener("submit", e => {
-  e.preventDefault();
-
-  const user = document.getElementById("username").value;
-  const pass = document.getElementById("password").value;
-  const error = document.getElementById("loginError");
-
-  if (user === LOGIN_USER && pass === LOGIN_PASS) {
-    localStorage.setItem("loggedIn", "true");
-    error.style.display = "none";
-    checkLogin();
-  } else {
-    error.style.display = "block";
-  }
-});
+// ================= PAGE SWITCH =================
+function switchPage(page) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById("page-" + page).classList.add("active");
+}
 
 // ================= API =================
 async function apiRequest(method, body = null, path = "") {
@@ -51,144 +40,82 @@ async function apiRequest(method, body = null, path = "") {
     headers: { "Content-Type": "application/json" },
     body: body ? JSON.stringify(body) : null
   });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text);
-  }
-
+  if (!res.ok) throw new Error(await res.text());
   return res.json();
-}
-
-// ================= LOAD DASHBOARD TABLE =================
-async function loadInventory() {
-  try {
-    const data = await apiRequest("GET");
-    const tbody = document.getElementById("dashTable");
-    if (!tbody) return;
-
-    tbody.innerHTML = "";
-
-    data.slice(0, 20).forEach(item => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${item.name || ""}</td>
-        <td>${item.role || ""}</td>
-        <td>${item.asset_desc || ""}</td>
-        <td>${item.asset_id || ""}</td>
-        <td>
-          <button onclick="deleteItem('${item.asset_id}')">Delete</button>
-        </td>
-      `;
-      tbody.appendChild(row);
-    });
-
-    updateStats(data);
-    updateRecent(data);
-  } catch (err) {
-    showAlert("Error loading data:\n" + err.message);
-  }
-}
-
-// ================= STATS =================
-function updateStats(data) {
-  document.getElementById("statTotal").innerText = data.length;
-  document.getElementById("statStudents").innerText =
-    data.filter(d => d.role === "student").length;
-  document.getElementById("statEmployees").innerText =
-    data.filter(d => d.role === "employee").length;
-}
-
-// ================= RECENT ACTIVITY =================
-function updateRecent(data) {
-  const recent = document.getElementById("recentList");
-  if (!recent) return;
-
-  recent.innerHTML = "";
-  data.slice(0, 5).forEach(d => {
-    const div = document.createElement("div");
-    div.textContent = `${d.name} → ${d.asset_desc}`;
-    recent.appendChild(div);
-  });
-}
-
-// ================= SAVE DATA =================
-async function saveData(event) {
-  event.preventDefault();
-
-  const role = document.getElementById("role").value;
-
-  const payload = {
-    date: new Date().toISOString().split("T")[0],
-    role,
-    title: document.getElementById("title").value,
-    name: document.getElementById("name").value,
-    email: document.getElementById("email").value,
-    id: role === "student"
-      ? document.getElementById("rollNo").value
-      : document.getElementById("empId").value,
-    batchOrDept: role === "student"
-      ? document.getElementById("batch").value
-      : document.getElementById("dept").value,
-    location: document.getElementById("location").value,
-    designation: document.getElementById("designation").value,
-    assetDesc: document.getElementById("assetDesc").value,
-    asset_type: document.getElementById("asset_type").value,
-    assetId: document.getElementById("assetId").value,
-    brand: document.getElementById("brand").value,
-    model: document.getElementById("model").value,
-    ram: document.getElementById("ram").value,
-    hdd: document.getElementById("hdd").value,
-    processor: document.getElementById("processor").value,
-    purchase_date: document.getElementById("purchase_date").value,
-    remarks: document.getElementById("remarks").value
-  };
-
-  try {
-    await apiRequest("POST", payload);
-    showAlert("Entry saved successfully");
-    document.getElementById("assetForm").reset();
-    loadInventory();
-  } catch (err) {
-    showAlert("Error saving data:\n" + err.message);
-  }
-}
-
-// ================= DELETE =================
-async function deleteItem(assetId) {
-  if (!confirm("Delete this record?")) return;
-
-  try {
-    await apiRequest("DELETE", null, "/" + assetId);
-    loadInventory();
-  } catch (err) {
-    showAlert("Error deleting:\n" + err.message);
-  }
-}
-
-// ================= DOWNLOAD =================
-function downloadSpecific(role, batch) {
-  let url = `${API_URL}/download?role=${role}`;
-  if (batch !== "all") url += `&batch=${batch}`;
-  window.location.href = url;
 }
 
 // ================= ROLE TOGGLE =================
 function toggleFields() {
-  const role = document.getElementById("role").value;
-  document.getElementById("studentFields").style.display =
-    role === "student" ? "block" : "none";
-  document.getElementById("empFields").style.display =
-    role === "employee" ? "block" : "none";
+  const r = role.value;
+  studentFields.style.display = r === "student" ? "block" : "none";
+  empFields.style.display = r === "employee" ? "block" : "none";
+}
+
+// ================= SAVE =================
+assetForm.addEventListener("submit", async e => {
+  e.preventDefault();
+  const r = role.value;
+
+  const payload = {
+    date: new Date().toISOString().split("T")[0],
+    role: r,
+    title: title.value,
+    name: name.value,
+    email: email.value,
+    id: r === "student" ? rollNo.value : empId.value,
+    batchOrDept: r === "student" ? batch.value : dept.value,
+    location: r === "student" ? studentLocation.value : empLocation.value,
+    designation: designation?.value || "",
+    assetDesc: assetDesc.value,
+    asset_type: asset_type.value,
+    assetId: assetId.value,
+    brand: brand.value,
+    model: model.value,
+    ram: ram.value,
+    hdd: hdd.value,
+    processor: processor.value,
+    purchase_date: purchase_date.value,
+    remarks: remarks.value
+  };
+
+  await apiRequest("POST", payload);
+  alert("Saved");
+  assetForm.reset();
+  toggleFields();
+  loadInventory();
+});
+
+// ================= LOAD =================
+async function loadInventory() {
+  const data = await apiRequest("GET");
+  dashTable.innerHTML = "";
+
+  statTotal.innerText = data.length;
+  statStudents.innerText = data.filter(d => d.role === "student").length;
+  statEmployees.innerText = data.filter(d => d.role === "employee").length;
+
+  data.slice(0, 20).forEach(d => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${d.name}</td>
+      <td>${d.role}</td>
+      <td>${d.asset_desc}</td>
+      <td>${d.asset_id}</td>
+      <td><button onclick="del('${d.asset_id}')">Delete</button></td>
+    `;
+    dashTable.appendChild(tr);
+  });
+}
+
+// ================= DELETE =================
+async function del(id) {
+  if (!confirm("Delete record?")) return;
+  await apiRequest("DELETE", null, "/" + id);
+  loadInventory();
 }
 
 // ================= INIT =================
 document.addEventListener("DOMContentLoaded", () => {
   checkLogin();
-
-  document.getElementById("assetForm")
-    ?.addEventListener("submit", saveData);
-
   toggleFields();
-  loadInventory();
 });
