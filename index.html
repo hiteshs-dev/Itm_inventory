@@ -1,279 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ITM University | Cloud Inventory System</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ITM University | Cloud Inventory System</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-    <!-- Login Modal -->
-    <div id="loginModal">
-        <div class="login-box">
-            <img src="image/ISU-LOGO.webp" alt="ITM Logo" class="login-img" onerror="this.src='https://via.placeholder.com/80?text=ITM'" style="height: 80px; margin-bottom: 1rem; opacity: 0.8;">
-            <h2 style="color: var(--primary); margin-bottom: 1rem;">ITM SYSTEM</h2>
-            <form id="loginForm">
-                <input type="text" id="username" placeholder="Username" required>
-                <input type="password" id="password" placeholder="Password" required>
-                <button type="submit" class="btn-submit">Login</button>
-            </form>
-            <p id="loginError" style="color: #ff3366; margin-top: 10px; display: none;">Invalid Credentials</p>
-        </div>
-    </div>
+<!-- ================= LOGIN MODAL ================= -->
+<div id="loginModal">
+  <div class="login-box">
+    <img src="image/ISU-LOGO.webp" alt="ITM Logo" class="login-img"
+      onerror="this.src='https://via.placeholder.com/80?text=ITM'"
+      style="height:80px;margin-bottom:1rem;opacity:.8;">
+    <h2 style="color:var(--primary);margin-bottom:1rem;">ITM SYSTEM</h2>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Username" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <button type="submit" class="btn-submit">Login</button>
+    </form>
+    <p id="loginError" style="color:#ff3366;margin-top:10px;display:none;">
+      Invalid Credentials
+    </p>
+  </div>
+</div>
 
-    <!-- Header -->
-    <header>
-        <div class="brand">
-            <img src="image/ISU-LOGO.webp" alt="ITM Logo" onerror="this.src='https://via.placeholder.com/50?text=ITM'" style="height: 50px;">
-            <span>ITM Inventory</span>
-        </div>
-        <nav class="nav-tabs" id="navTabs" style="display: none;">
-            <button class="nav-btn active" onclick="switchPage('entry')">Data Entry</button>
-            <button class="nav-btn" onclick="switchPage('dashboard')">Dashboard</button>
-            <button class="nav-btn" onclick="logout()">Logout</button>
-        </nav>
-    </header>
+<!-- ================= HEADER ================= -->
+<header>
+  <div class="brand">
+    <img src="image/ISU-LOGO.webp" alt="ITM Logo"
+      onerror="this.src='https://via.placeholder.com/50?text=ITM'"
+      style="height:50px;">
+    <span>ITM Inventory</span>
+  </div>
+  <nav class="nav-tabs" id="navTabs" style="display:none;">
+    <button class="nav-btn active" onclick="switchPage('entry')">Data Entry</button>
+    <button class="nav-btn" onclick="switchPage('dashboard')">Dashboard</button>
+    <button class="nav-btn" onclick="logout()">Logout</button>
+  </nav>
+</header>
 
-    <!-- Main Application -->
-    <main id="mainApp">
-        
-        <!-- Page 1: Data Entry -->
-        <div id="page-entry" class="page active">
-            <div class="entry-grid">
-                <!-- Form Section -->
-                <section class="card">
-                    <h2 style="color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 20px;">Add / Edit Entry</h2>
-                    <form id="assetForm">
-                        <input type="hidden" id="editMode" value="false">
-                        <input type="hidden" id="originalId">
+<!-- ================= MAIN ================= -->
+<main id="mainApp">
 
-                        <!-- Row 1: Role & Title -->
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Role</label>
-                                <select id="role" onchange="toggleFields()" required>
-                                    <option value="student">Student</option>
-                                    <option value="employee">Employee</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Title</label>
-                                <select id="title">
-                                    <option value="Mr.">Mr.</option>
-                                    <option value="Ms.">Ms.</option>
-                                    <option value="Dr.">Dr.</option>
-                                    <option value="Prof.">Prof.</option>
-                                </select>
-                            </div>
-                        </div>
+<!-- ===== PAGE: ENTRY ===== -->
+<div id="page-entry" class="page active">
+<div class="entry-grid">
 
-                        <!-- Row 2: Name & Email -->
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Full Name</label>
-                                <input type="text" id="name" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Email ID</label>
-                                <input type="email" id="email">
-                            </div>
-                        </div>
+<section class="card">
+<h2>Add / Edit Entry</h2>
 
-                        <!-- Student Fields -->
-                        <div id="studentFields">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Batch / Year</label>
-                                    <select id="batch" required>
-                                        <option value="2027">Batch 2027</option>
-                                        <option value="2026">Batch 2026</option>
-                                        <option value="2025">Batch 2025</option>
-                                        <option value="2024">Batch 2024</option>
-                                        <option value="2023">Batch 2023</option>
-                                        <option value="2022">Batch 2022</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Roll Number</label>
-                                    <input type="text" id="rollNo">
-                                </div>
-                            </div>
-                            <!-- Added Location for Students -->
-                            <div class="form-group">
-                                <label>Location (Hostel/Home)</label>
-                                <input type="text" id="location" placeholder="e.g., Hostel Block A, Home">
-                            </div>
-                        </div>
+<form id="assetForm">
 
-                        <!-- Employee Fields -->
-                        <div id="empFields" class="hidden">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Department</label>
-                                    <input type="text" id="dept">
-                                </div>
-                                <div class="form-group">
-                                    <label>Designation</label>
-                                    <input type="text" id="designation">
-                                </div>
-                            </div>
-                            <div class="form-row" style="margin-top: 10px;">
-                                <div class="form-group">
-                                    <label>Employee ID</label>
-                                    <input type="text" id="empId">
-                                </div>
-                                <!-- Added Location for Employees -->
-                                <div class="form-group">
-                                    <label>Office Location</label>
-                                    <input type="text" id="location" placeholder="e.g., Room 404, Admin Block">
-                                </div>
-                            </div>
-                        </div>
+<div class="form-row">
+  <select id="role" onchange="toggleFields()">
+    <option value="student">Student</option>
+    <option value="employee">Employee</option>
+  </select>
 
-                        <hr style="margin: 20px 0; border: 0; border-top: 1px solid var(--border);">
-                        <h3 style="margin-bottom: 15px; color: var(--primary); font-size: 0.9rem; text-transform: uppercase;">Asset Specifications</h3>
+  <select id="title">
+    <option value="Mr.">Mr.</option>
+    <option value="Ms.">Ms.</option>
+    <option value="Dr.">Dr.</option>
+    <option value="Prof.">Prof.</option>
+  </select>
+</div>
 
-                        <!-- Asset Row 1 -->
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Asset Description</label>
-                                <input type="text" id="assetDesc" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Asset Type</label>
-                                <select id="asset_type">
-                                    <option value="Laptop">Laptop</option>
-                                    <option value="Desktop">Desktop</option>
-                                    <option value="Tablet">Tablet</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                            </div>
-                        </div>
+<input id="name" placeholder="Full Name" required>
+<input id="email" placeholder="Email">
 
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Serial Number</label>
-                                <input type="text" id="assetId" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Purchase Date</label>
-                                <input type="date" id="purchase_date">
-                            </div>
-                        </div>
+<!-- STUDENT -->
+<div id="studentFields">
+  <select id="batch">
+    <option value="2027">Batch 2027</option>
+    <option value="2026">Batch 2026</option>
+  </select>
+  <input id="rollNo" placeholder="Roll Number">
+  <input id="studentLocation" placeholder="Hostel / Home">
+</div>
 
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Brand</label>
-                                <input type="text" id="brand" placeholder="e.g., Dell, HP">
-                            </div>
-                            <div class="form-group">
-                                <label>Model</label>
-                                <input type="text" id="model">
-                            </div>
-                        </div>
+<!-- EMPLOYEE -->
+<div id="empFields" class="hidden">
+  <input id="dept" placeholder="Department">
+  <input id="designation" placeholder="Designation">
+  <input id="empId" placeholder="Employee ID">
+  <input id="empLocation" placeholder="Office Location">
+</div>
 
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>RAM</label>
-                                <input type="text" id="ram" placeholder="e.g., 8GB">
-                            </div>
-                            <div class="form-group">
-                                <label>Processor</label>
-                                <input type="text" id="processor" placeholder="e.g., i5 12th Gen">
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>HDD / SSD</label>
-                            <input type="text" id="hdd" placeholder="e.g., 512GB SSD">
-                        </div>
+<hr>
 
-                        <div class="form-group">
-                            <label>Remarks</label>
-                            <textarea id="remarks" rows="3" placeholder="Any additional notes..."></textarea>
-                        </div>
+<input id="assetDesc" placeholder="Asset Description" required>
+<select id="asset_type">
+  <option value="Laptop">Laptop</option>
+  <option value="Desktop">Desktop</option>
+</select>
 
-                        <button type="submit" id="submitBtn" class="btn-submit">Submit Entry</button>
-                        <button type="button" id="cancelBtn" class="btn-submit hidden" style="background: #333;" onclick="resetForm()">Cancel Edit</button>
-                    </form>
-                </section>
+<input id="assetId" placeholder="Serial Number" required>
+<input id="purchase_date" type="date">
 
-                <!-- Cloud Action Section (3 Specific Downloads) -->
-                <section class="card cloud-action">
-                    <h2 style="color: var(--primary);">Master Database</h2>
-                    <p style="color: var(--text-muted); margin-bottom: 2rem;">Download specific database records.</p>
-                    
-                    <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 300px;">
-                        <button class="btn-excel" onclick="downloadSpecific('student', '2026')">
-                            <span>🎓</span> Batch 2026 (Students)
-                        </button>
-                        <button class="btn-excel" onclick="downloadSpecific('student', '2027')">
-                            <span>🎓</span> Batch 2027 (Students)
-                        </button>
-                        <button class="btn-excel" onclick="downloadSpecific('employee', 'all')">
-                            <span>👔</span> All ITM Employees
-                        </button>
-                    </div>
-                    
-                    <div style="margin-top: 3rem; width: 100%; border-top: 1px solid var(--border); padding-top: 1.5rem;">
-                        <h3 style="color: var(--text-main);">Recent Activity</h3>
-                        <div id="recentList" style="text-align: left; margin-top: 10px; color: var(--text-muted);"></div>
-                    </div>
-                </section>
-            </div>
-        </div>
+<input id="brand" placeholder="Brand">
+<input id="model" placeholder="Model">
+<input id="ram" placeholder="RAM">
+<input id="processor" placeholder="Processor">
+<input id="hdd" placeholder="Storage">
+<textarea id="remarks" placeholder="Remarks"></textarea>
 
-        <!-- Page 2: Dashboard -->
-        <div id="page-dashboard" class="page">
-            <h2 class="page-title">Analytics Dashboard</h2>
-            
-            <div class="dashboard-stats">
-                <div class="stat-card">
-                    <div class="stat-num" id="statTotal">0</div>
-                    <div class="stat-label">Total Assets</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-num" id="statStudents">0</div>
-                    <div class="stat-label">Students</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-num" id="statEmployees">0</div>
-                    <div class="stat-label">Employees</div>
-                </div>
-            </div>
+<button type="submit" class="btn-submit">Submit Entry</button>
+</form>
+</section>
 
-            <div class="charts-container">
-                <div class="chart-box">
-                    <canvas id="roleChart"></canvas>
-                </div>
-                <div class="chart-box">
-                    <canvas id="batchChart"></canvas>
-                </div>
-            </div>
+</div>
+</div>
 
-            <div class="card" style="margin-top: 2rem;">
-                <h3 style="color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 10px;">Live Data Feed</h3>
-                <div class="table-wrapper">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Role</th>
-                                <th>Asset</th>
-                                <th>Serial</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dashTable"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+<!-- ===== PAGE: DASHBOARD ===== -->
+<div id="page-dashboard" class="page">
+<h2>Analytics Dashboard</h2>
 
-    </main>
+<div>
+Total: <span id="statTotal">0</span> |
+Students: <span id="statStudents">0</span> |
+Employees: <span id="statEmployees">0</span>
+</div>
 
-    <script src="script.js"></script>
+<table class="data-table">
+<thead>
+<tr>
+<th>Name</th>
+<th>Role</th>
+<th>Asset</th>
+<th>Serial</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="dashTable"></tbody>
+</table>
+</div>
+
+</main>
+
+<script src="script.js"></script>
 </body>
 </html>
