@@ -3,20 +3,47 @@ const API_URL = "/.netlify/functions/data";
 const LOGIN_USER = "admin";
 const LOGIN_PASS = "unix@2026";
 
+// ================= DOM ELEMENTS =================
+const loginModal = document.getElementById("loginModal");
+const loginForm = document.getElementById("loginForm");
+const loginError = document.getElementById("loginError");
+const navTabs = document.getElementById("navTabs");
+const mainApp = document.getElementById("mainApp");
+
+const assetForm = document.getElementById("assetForm");
+const dashTable = document.getElementById("dashTable");
+
+const role = document.getElementById("role");
+const studentFields = document.getElementById("studentFields");
+const empFields = document.getElementById("empFields");
+
+const statTotal = document.getElementById("statTotal");
+const statStudents = document.getElementById("statStudents");
+const statEmployees = document.getElementById("statEmployees");
+
+const recentList = document.getElementById("recentList");
+
 // ================= LOGIN =================
 function checkLogin() {
-  const ok = localStorage.getItem("loggedIn") === "true";
-  loginModal.style.display = ok ? "none" : "flex";
-  navTabs.style.display = ok ? "flex" : "none";
+  const loggedIn = localStorage.getItem("loggedIn") === "true";
+
+  loginModal.style.display = loggedIn ? "none" : "flex";
+  navTabs.style.display = loggedIn ? "flex" : "none";
+  mainApp.style.display = loggedIn ? "block" : "none";
+
+  if (loggedIn) loadInventory();
 }
 
 loginForm.addEventListener("submit", e => {
   e.preventDefault();
-  if (username.value === LOGIN_USER && password.value === LOGIN_PASS) {
+
+  const user = document.getElementById("username").value;
+  const pass = document.getElementById("password").value;
+
+  if (user === LOGIN_USER && pass === LOGIN_PASS) {
     localStorage.setItem("loggedIn", "true");
     loginError.style.display = "none";
     checkLogin();
-    loadInventory();
   } else {
     loginError.style.display = "block";
   }
@@ -40,7 +67,12 @@ async function apiRequest(method, body = null, path = "") {
     headers: { "Content-Type": "application/json" },
     body: body ? JSON.stringify(body) : null
   });
-  if (!res.ok) throw new Error(await res.text());
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text);
+  }
+
   return res.json();
 }
 
@@ -51,67 +83,108 @@ function toggleFields() {
   empFields.style.display = r === "employee" ? "block" : "none";
 }
 
-// ================= SAVE =================
+// ================= SAVE DATA =================
 assetForm.addEventListener("submit", async e => {
   e.preventDefault();
-  const r = role.value;
 
-  const payload = {
-    date: new Date().toISOString().split("T")[0],
-    role: r,
-    title: title.value,
-    name: name.value,
-    email: email.value,
-    id: r === "student" ? rollNo.value : empId.value,
-    batchOrDept: r === "student" ? batch.value : dept.value,
-    location: r === "student" ? studentLocation.value : empLocation.value,
-    designation: designation?.value || "",
-    assetDesc: assetDesc.value,
-    asset_type: asset_type.value,
-    assetId: assetId.value,
-    brand: brand.value,
-    model: model.value,
-    ram: ram.value,
-    hdd: hdd.value,
-    processor: processor.value,
-    purchase_date: purchase_date.value,
-    remarks: remarks.value
-  };
+  try {
+    const r = role.value;
 
-  await apiRequest("POST", payload);
-  alert("Saved");
-  assetForm.reset();
-  toggleFields();
-  loadInventory();
+    const payload = {
+      date: new Date().toISOString().split("T")[0],
+      role: r,
+      title: document.getElementById("title").value,
+      name: document.getElementById("name").value,
+      email: document.getElementById("email").value,
+      id: r === "student"
+        ? document.getElementById("rollNo").value
+        : document.getElementById("empId").value,
+      batchOrDept: r === "student"
+        ? document.getElementById("batch").value
+        : document.getElementById("dept").value,
+      location: r === "student"
+        ? document.getElementById("studentLocation").value
+        : document.getElementById("empLocation").value,
+      designation: document.getElementById("designation")?.value || "",
+      assetDesc: document.getElementById("assetDesc").value,
+      asset_type: document.getElementById("asset_type").value,
+      assetId: document.getElementById("assetId").value,
+      brand: document.getElementById("brand")?.value || "",
+      model: document.getElementById("model")?.value || "",
+      ram: document.getElementById("ram")?.value || "",
+      hdd: document.getElementById("hdd")?.value || "",
+      processor: document.getElementById("processor")?.value || "",
+      purchase_date: document.getElementById("purchase_date").value,
+      remarks: document.getElementById("remarks").value
+    };
+
+    await apiRequest("POST", payload);
+    alert("Entry saved successfully");
+
+    assetForm.reset();
+    toggleFields();
+    loadInventory();
+
+  } catch (err) {
+    alert("Error saving data:\n" + err.message);
+  }
 });
 
-// ================= LOAD =================
+// ================= LOAD DATA =================
 async function loadInventory() {
-  const data = await apiRequest("GET");
-  dashTable.innerHTML = "";
+  try {
+    const data = await apiRequest("GET");
 
-  statTotal.innerText = data.length;
-  statStudents.innerText = data.filter(d => d.role === "student").length;
-  statEmployees.innerText = data.filter(d => d.role === "employee").length;
+    dashTable.innerHTML = "";
 
-  data.slice(0, 20).forEach(d => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${d.name}</td>
-      <td>${d.role}</td>
-      <td>${d.asset_desc}</td>
-      <td>${d.asset_id}</td>
-      <td><button onclick="del('${d.asset_id}')">Delete</button></td>
-    `;
-    dashTable.appendChild(tr);
-  });
+    statTotal.innerText = data.length;
+    statStudents.innerText = data.filter(d => d.role === "student").length;
+    statEmployees.innerText = data.filter(d => d.role === "employee").length;
+
+    recentList.innerHTML = "";
+
+    data.slice(0, 5).forEach(d => {
+      const div = document.createElement("div");
+      div.textContent = `${d.name} → ${d.asset_desc}`;
+      recentList.appendChild(div);
+    });
+
+    data.slice(0, 20).forEach(d => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${d.name || ""}</td>
+        <td>${d.role || ""}</td>
+        <td>${d.asset_desc || ""}</td>
+        <td>${d.asset_id || ""}</td>
+        <td>
+          <button onclick="deleteItem('${d.asset_id}')">Delete</button>
+        </td>
+      `;
+      dashTable.appendChild(tr);
+    });
+
+  } catch (err) {
+    alert("Error loading data:\n" + err.message);
+  }
 }
 
 // ================= DELETE =================
-async function del(id) {
-  if (!confirm("Delete record?")) return;
-  await apiRequest("DELETE", null, "/" + id);
-  loadInventory();
+async function deleteItem(id) {
+  if (!confirm("Delete this record?")) return;
+
+  try {
+    await apiRequest("DELETE", null, "/" + id);
+    loadInventory();
+  } catch (err) {
+    alert("Delete failed:\n" + err.message);
+  }
+}
+
+// ================= DOWNLOAD =================
+function downloadSpecific(role, batch) {
+  let url = `${API_URL}/download?role=${role}`;
+  if (batch !== "all") url += `&batch=${batch}`;
+  window.location.href = url;
 }
 
 // ================= INIT =================
