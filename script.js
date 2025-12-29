@@ -2,8 +2,8 @@
 const API_URL = "/.netlify/functions/data";
 
 // ================= HELPERS =================
-function showAlert(message) {
-  alert(message);
+function showAlert(msg) {
+  alert(msg);
 }
 
 async function apiRequest(method, body = null, path = "") {
@@ -18,76 +18,99 @@ async function apiRequest(method, body = null, path = "") {
     throw new Error(text);
   }
 
-  const contentType = res.headers.get("content-type");
-  if (contentType && contentType.includes("application/json")) {
-    return res.json();
-  }
-
-  return res.text();
+  return res.json();
 }
 
-// ================= LOAD DATA =================
+// ================= LOAD DASHBOARD TABLE =================
 async function loadInventory() {
   try {
     const data = await apiRequest("GET");
-    const tbody = document.querySelector("#inventoryTable tbody");
+    const tbody = document.getElementById("dashTable");
+
+    if (!tbody) return;
+
     tbody.innerHTML = "";
 
-    data.forEach((item, index) => {
+    data.slice(0, 20).forEach(item => {
       const row = document.createElement("tr");
-
       row.innerHTML = `
-        <td>${index + 1}</td>
-        <td>${item.date || ""}</td>
-        <td>${item.role || ""}</td>
         <td>${item.name || ""}</td>
-        <td>${item.asset_type || ""}</td>
+        <td>${item.role || ""}</td>
         <td>${item.asset_desc || ""}</td>
         <td>${item.asset_id || ""}</td>
         <td>
           <button onclick="deleteItem('${item.asset_id}')">Delete</button>
         </td>
       `;
-
       tbody.appendChild(row);
     });
+
+    updateStats(data);
+    updateRecent(data);
+
   } catch (err) {
     showAlert("Error loading data:\n" + err.message);
   }
+}
+
+// ================= STATS =================
+function updateStats(data) {
+  document.getElementById("statTotal").innerText = data.length;
+  document.getElementById("statStudents").innerText =
+    data.filter(d => d.role === "student").length;
+  document.getElementById("statEmployees").innerText =
+    data.filter(d => d.role === "employee").length;
+}
+
+// ================= RECENT ACTIVITY =================
+function updateRecent(data) {
+  const recent = document.getElementById("recentList");
+  if (!recent) return;
+
+  recent.innerHTML = "";
+  data.slice(0, 5).forEach(d => {
+    const div = document.createElement("div");
+    div.textContent = `${d.name} → ${d.asset_desc}`;
+    recent.appendChild(div);
+  });
 }
 
 // ================= SAVE DATA =================
 async function saveData(event) {
   event.preventDefault();
 
-  const form = event.target;
+  const role = document.getElementById("role").value;
 
-  const data = {
-    date: form.date.value,
-    role: form.role.value,
-    title: form.title.value,
-    name: form.name.value,
-    email: form.email.value,
-    id: form.id.value,
-    batchOrDept: form.batchOrDept.value,
-    location: form.location.value,
-    designation: form.designation.value,
-    assetDesc: form.assetDesc.value,
-    asset_type: form.assetType.value,
-    assetId: form.assetId.value,
-    brand: form.brand.value,
-    model: form.model.value,
-    ram: form.ram.value,
-    hdd: form.hdd.value,
-    processor: form.processor.value,
-    purchase_date: form.purchaseDate.value,
-    remarks: form.remarks.value
+  const payload = {
+    date: new Date().toISOString().split("T")[0],
+    role,
+    title: document.getElementById("title").value,
+    name: document.getElementById("name").value,
+    email: document.getElementById("email").value,
+    id: role === "student"
+      ? document.getElementById("rollNo").value
+      : document.getElementById("empId").value,
+    batchOrDept: role === "student"
+      ? document.getElementById("batch").value
+      : document.getElementById("dept").value,
+    location: document.getElementById("location").value,
+    designation: document.getElementById("designation").value,
+    assetDesc: document.getElementById("assetDesc").value,
+    asset_type: document.getElementById("asset_type").value,
+    assetId: document.getElementById("assetId").value,
+    brand: document.getElementById("brand").value,
+    model: document.getElementById("model").value,
+    ram: document.getElementById("ram").value,
+    hdd: document.getElementById("hdd").value,
+    processor: document.getElementById("processor").value,
+    purchase_date: document.getElementById("purchase_date").value,
+    remarks: document.getElementById("remarks").value
   };
 
   try {
-    await apiRequest("POST", data);
-    showAlert("Data saved successfully");
-    form.reset();
+    await apiRequest("POST", payload);
+    showAlert("Entry saved successfully");
+    document.getElementById("assetForm").reset();
     loadInventory();
   } catch (err) {
     showAlert("Error saving data:\n" + err.message);
@@ -96,27 +119,37 @@ async function saveData(event) {
 
 // ================= DELETE =================
 async function deleteItem(assetId) {
-  if (!confirm("Are you sure you want to delete this item?")) return;
+  if (!confirm("Delete this record?")) return;
 
   try {
     await apiRequest("DELETE", null, "/" + assetId);
-    showAlert("Item deleted");
     loadInventory();
   } catch (err) {
-    showAlert("Error deleting data:\n" + err.message);
+    showAlert("Error deleting:\n" + err.message);
   }
 }
 
-// ================= DOWNLOAD CSV =================
-function downloadCSV() {
-  window.location.href = API_URL + "/download";
+// ================= DOWNLOAD =================
+function downloadSpecific(role, batch) {
+  let url = `${API_URL}/download?role=${role}`;
+  if (batch !== "all") url += `&batch=${batch}`;
+  window.location.href = url;
+}
+
+// ================= ROLE TOGGLE =================
+function toggleFields() {
+  const role = document.getElementById("role").value;
+  document.getElementById("studentFields").style.display =
+    role === "student" ? "block" : "none";
+  document.getElementById("empFields").style.display =
+    role === "employee" ? "block" : "none";
 }
 
 // ================= INIT =================
 document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("inventoryForm");
-  if (form) {
-    form.addEventListener("submit", saveData);
-  }
+  document.getElementById("assetForm")
+    .addEventListener("submit", saveData);
+
+  toggleFields();
   loadInventory();
 });
