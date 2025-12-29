@@ -1,0 +1,17 @@
+body {
+  font-family: Arial;
+  background: #0f172a;
+  color: white;
+  text-align: center;
+}
+
+.hidden { display: none; }
+
+.login-box {
+  margin-top: 120px;
+}
+
+input, select, button {
+  padding: 10px;
+  margin: 5px;
+}

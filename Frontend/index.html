@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ITM Inventory System</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="login-box" id="loginBox">
+  <h2>ITM Login</h2>
+  <input id="username" placeholder="Username" />
+  <input id="password" type="password" placeholder="Password" />
+  <button onclick="login()">Login</button>
+  <p id="loginError"></p>
+</div>
+
+<div id="app" class="hidden">
+  <h1>ITM Inventory</h1>
+
+  <form id="assetForm">
+    <input id="name" placeholder="Name" required />
+    <select id="role">
+      <option value="student">Student</option>
+      <option value="employee">Employee</option>
+    </select>
+    <input id="asset" placeholder="Asset Name" required />
+    <input id="serial" placeholder="Serial No" required />
+    <button>Add Asset</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th><th>Role</th><th>Asset</th><th>Serial</th><th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="table"></tbody>
+  </table>
+
+  <button onclick="logout()">Logout</button>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
