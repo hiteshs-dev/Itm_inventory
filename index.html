@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ITM University | Cloud Inventory System</title>
+
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -12,16 +13,22 @@
 <!-- ================= LOGIN MODAL ================= -->
 <div id="loginModal">
   <div class="login-box">
-    <img src="image/ISU-LOGO.webp" alt="ITM Logo" class="login-img"
-      onerror="this.src='https://via.placeholder.com/80?text=ITM'"
-      style="height:80px;margin-bottom:1rem;opacity:.8;">
-    <h2 style="color:var(--primary);margin-bottom:1rem;">ITM SYSTEM</h2>
+    <img src="image/ISU-LOGO.webp"
+         alt="ITM Logo"
+         class="login-img"
+         onerror="this.src='https://via.placeholder.com/80?text=ITM'"
+         style="height:80px;margin-bottom:1rem;opacity:0.8">
+
+    <h2 style="color:var(--primary);margin-bottom:1rem">ITM SYSTEM</h2>
+
     <form id="loginForm">
       <input type="text" id="username" placeholder="Username" required>
       <input type="password" id="password" placeholder="Password" required>
       <button type="submit" class="btn-submit">Login</button>
     </form>
-    <p id="loginError" style="color:#ff3366;margin-top:10px;display:none;">
+
+    <p id="loginError"
+       style="color:#ff3366;margin-top:10px;display:none">
       Invalid Credentials
     </p>
   </div>
@@ -30,113 +37,201 @@
 <!-- ================= HEADER ================= -->
 <header>
   <div class="brand">
-    <img src="image/ISU-LOGO.webp" alt="ITM Logo"
-      onerror="this.src='https://via.placeholder.com/50?text=ITM'"
-      style="height:50px;">
+    <img src="image/ISU-LOGO.webp"
+         alt="ITM Logo"
+         onerror="this.src='https://via.placeholder.com/50?text=ITM'"
+         style="height:50px">
     <span>ITM Inventory</span>
   </div>
-  <nav class="nav-tabs" id="navTabs" style="display:none;">
+
+  <nav class="nav-tabs" id="navTabs" style="display:none">
     <button class="nav-btn active" onclick="switchPage('entry')">Data Entry</button>
     <button class="nav-btn" onclick="switchPage('dashboard')">Dashboard</button>
     <button class="nav-btn" onclick="logout()">Logout</button>
   </nav>
 </header>
 
-<!-- ================= MAIN ================= -->
-<main id="mainApp">
+<!-- ================= MAIN APP ================= -->
+<main id="mainApp" style="display:none">
 
-<!-- ===== PAGE: ENTRY ===== -->
-<div id="page-entry" class="page active">
-<div class="entry-grid">
+<!-- ================= PAGE: ENTRY ================= -->
+<section id="page-entry" class="page active">
+  <div class="entry-grid">
 
-<section class="card">
-<h2>Add / Edit Entry</h2>
+    <!-- ===== FORM ===== -->
+    <section class="card">
+      <h2 style="border-bottom:1px solid var(--border);padding-bottom:15px">
+        Add / Edit Entry
+      </h2>
 
-<form id="assetForm">
+      <form id="assetForm">
 
-<div class="form-row">
-  <select id="role" onchange="toggleFields()">
-    <option value="student">Student</option>
-    <option value="employee">Employee</option>
-  </select>
+        <!-- Role + Title -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Role</label>
+            <select id="role" onchange="toggleFields()" required>
+              <option value="student">Student</option>
+              <option value="employee">Employee</option>
+            </select>
+          </div>
 
-  <select id="title">
-    <option value="Mr.">Mr.</option>
-    <option value="Ms.">Ms.</option>
-    <option value="Dr.">Dr.</option>
-    <option value="Prof.">Prof.</option>
-  </select>
-</div>
+          <div class="form-group">
+            <label>Title</label>
+            <select id="title">
+              <option>Mr.</option>
+              <option>Ms.</option>
+              <option>Dr.</option>
+              <option>Prof.</option>
+            </select>
+          </div>
+        </div>
 
-<input id="name" placeholder="Full Name" required>
-<input id="email" placeholder="Email">
+        <!-- Name + Email -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="name" required>
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="email">
+          </div>
+        </div>
 
-<!-- STUDENT -->
-<div id="studentFields">
-  <select id="batch">
-    <option value="2027">Batch 2027</option>
-    <option value="2026">Batch 2026</option>
-  </select>
-  <input id="rollNo" placeholder="Roll Number">
-  <input id="studentLocation" placeholder="Hostel / Home">
-</div>
+        <!-- STUDENT -->
+        <div id="studentFields">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Batch</label>
+              <select id="batch">
+                <option value="2027">2027</option>
+                <option value="2026">2026</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Roll No</label>
+              <input id="rollNo">
+            </div>
+          </div>
 
-<!-- EMPLOYEE -->
-<div id="empFields" class="hidden">
-  <input id="dept" placeholder="Department">
-  <input id="designation" placeholder="Designation">
-  <input id="empId" placeholder="Employee ID">
-  <input id="empLocation" placeholder="Office Location">
-</div>
+          <div class="form-group">
+            <label>Location</label>
+            <input id="studentLocation" placeholder="Hostel / Home">
+          </div>
+        </div>
 
-<hr>
+        <!-- EMPLOYEE -->
+        <div id="empFields" class="hidden">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Department</label>
+              <input id="dept">
+            </div>
+            <div class="form-group">
+              <label>Designation</label>
+              <input id="designation">
+            </div>
+          </div>
 
-<input id="assetDesc" placeholder="Asset Description" required>
-<select id="asset_type">
-  <option value="Laptop">Laptop</option>
-  <option value="Desktop">Desktop</option>
-</select>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Employee ID</label>
+              <input id="empId">
+            </div>
+            <div class="form-group">
+              <label>Office Location</label>
+              <input id="empLocation">
+            </div>
+          </div>
+        </div>
 
-<input id="assetId" placeholder="Serial Number" required>
-<input id="purchase_date" type="date">
+        <hr>
 
-<input id="brand" placeholder="Brand">
-<input id="model" placeholder="Model">
-<input id="ram" placeholder="RAM">
-<input id="processor" placeholder="Processor">
-<input id="hdd" placeholder="Storage">
-<textarea id="remarks" placeholder="Remarks"></textarea>
+        <!-- ASSET -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Asset Description</label>
+            <input id="assetDesc" required>
+          </div>
+          <div class="form-group">
+            <label>Asset Type</label>
+            <select id="asset_type">
+              <option>Laptop</option>
+              <option>Desktop</option>
+              <option>Tablet</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
 
-<button type="submit" class="btn-submit">Submit Entry</button>
-</form>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Serial Number</label>
+            <input id="assetId" required>
+          </div>
+          <div class="form-group">
+            <label>Purchase Date</label>
+            <input type="date" id="purchase_date">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Remarks</label>
+          <textarea id="remarks"></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit">Submit Entry</button>
+
+      </form>
+    </section>
+
+    <!-- ===== CLOUD ACTION ===== -->
+    <section class="card cloud-action">
+      <h2>Master Database</h2>
+
+      <button class="btn-excel" onclick="downloadSpecific('student','2026')">
+        🎓 Batch 2026
+      </button>
+      <button class="btn-excel" onclick="downloadSpecific('student','2027')">
+        🎓 Batch 2027
+      </button>
+      <button class="btn-excel" onclick="downloadSpecific('employee','all')">
+        👔 Employees
+      </button>
+
+      <h3 style="margin-top:2rem">Recent Activity</h3>
+      <div id="recentList"></div>
+    </section>
+
+  </div>
 </section>
 
-</div>
-</div>
+<!-- ================= PAGE: DASHBOARD ================= -->
+<section id="page-dashboard" class="page">
+  <h2>Analytics Dashboard</h2>
 
-<!-- ===== PAGE: DASHBOARD ===== -->
-<div id="page-dashboard" class="page">
-<h2>Analytics Dashboard</h2>
+  <div class="dashboard-stats">
+    <div class="stat-card"><div id="statTotal">0</div>Total</div>
+    <div class="stat-card"><div id="statStudents">0</div>Students</div>
+    <div class="stat-card"><div id="statEmployees">0</div>Employees</div>
+  </div>
 
-<div>
-Total: <span id="statTotal">0</span> |
-Students: <span id="statStudents">0</span> |
-Employees: <span id="statEmployees">0</span>
-</div>
-
-<table class="data-table">
-<thead>
-<tr>
-<th>Name</th>
-<th>Role</th>
-<th>Asset</th>
-<th>Serial</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody id="dashTable"></tbody>
-</table>
-</div>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Role</th>
+        <th>Asset</th>
+        <th>Serial</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="dashTable"></tbody>
+  </table>
+</section>
 
 </main>
 
