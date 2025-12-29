@@ -1,11 +1,50 @@
 // ================= CONFIG =================
 const API_URL = "/.netlify/functions/data";
 
+// ================= LOGIN CONFIG =================
+const LOGIN_USER = "admin";
+const LOGIN_PASS = "unix@2026";
+
 // ================= HELPERS =================
 function showAlert(msg) {
   alert(msg);
 }
 
+// ================= LOGIN LOGIC =================
+function checkLogin() {
+  const loggedIn = localStorage.getItem("loggedIn");
+
+  if (loggedIn === "true") {
+    document.getElementById("loginModal").style.display = "none";
+    document.getElementById("navTabs").style.display = "flex";
+  } else {
+    document.getElementById("loginModal").style.display = "flex";
+    document.getElementById("navTabs").style.display = "none";
+  }
+}
+
+function logout() {
+  localStorage.removeItem("loggedIn");
+  location.reload();
+}
+
+document.getElementById("loginForm")?.addEventListener("submit", e => {
+  e.preventDefault();
+
+  const user = document.getElementById("username").value;
+  const pass = document.getElementById("password").value;
+  const error = document.getElementById("loginError");
+
+  if (user === LOGIN_USER && pass === LOGIN_PASS) {
+    localStorage.setItem("loggedIn", "true");
+    error.style.display = "none";
+    checkLogin();
+  } else {
+    error.style.display = "block";
+  }
+});
+
+// ================= API =================
 async function apiRequest(method, body = null, path = "") {
   const res = await fetch(API_URL + path, {
     method,
@@ -26,7 +65,6 @@ async function loadInventory() {
   try {
     const data = await apiRequest("GET");
     const tbody = document.getElementById("dashTable");
-
     if (!tbody) return;
 
     tbody.innerHTML = "";
@@ -47,7 +85,6 @@ async function loadInventory() {
 
     updateStats(data);
     updateRecent(data);
-
   } catch (err) {
     showAlert("Error loading data:\n" + err.message);
   }
@@ -147,8 +184,10 @@ function toggleFields() {
 
 // ================= INIT =================
 document.addEventListener("DOMContentLoaded", () => {
+  checkLogin();
+
   document.getElementById("assetForm")
-    .addEventListener("submit", saveData);
+    ?.addEventListener("submit", saveData);
 
   toggleFields();
   loadInventory();
